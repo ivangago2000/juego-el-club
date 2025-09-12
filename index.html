@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruleta de Preguntas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #f9f9f9, #e6e6e6);
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 32px;
+      color: #333;
+    }
+    button {
+      padding: 12px 24px;
+      margin-top: 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #resultado {
+      margin-top: 30px;
+      font-size: 22px;
+      text-align: center;
+      max-width: 500px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 600px;
+    }
+    .checkboxes label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #eee;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .checkboxes label:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎡 Ruleta de Preguntas</h1>
+
+  <div class="checkboxes" id="jugadoresCheckboxes"></div>
+  <button onclick="guardarJugadores()">Confirmar Jugadores</button>
+
+  <button onclick="girarRuleta()" style="display:none;" id="btnGirar">Girar Ruleta</button>
+  <div id="resultado"></div>
+
+  <script>
+    const preguntas = {
+      "Iván": [
+        "¿Cuántas veces has dicho “Oier saca un juego” en tu vida?",
+        "¿Quién del grupo te cae peor cuando está borracho?",
+        "¿Cuántas copas has derramado y te has hecho el loco?",
+        "¿Quién dejarías al cargo como líder?",
+        "Si fueras director de Harry Potter, ¿qué personaje tendría Nicolás? ¿Y Bruno?",
+        "¿Qué es más fuerte: tu liderazgo en el grupo o tu carácter enojón?",
+        "¿A quién retarías primero a una pelea de bar: Bruno, Oier o un segurata de Flash?",
+        "¿Qué prefieres: perrear hasta abajo con Nicolás o que Oier saque un juego?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal en Flash?",
+        "Si pudieras intercambiar vidas por una semana con alguien del grupo, ¿con quién sería?",
+        "Si tuvieras que vivir en un piso compartido con 3 de aquí, ¿a quiénes eliges?",
+        "¿Con quién del grupo tendrías más risas en un viaje?",
+        "¿Qué prefieres: que Nicolás te cambie por un africano de Budha o que Bruno diga que Carlos es su verdadero mejo?",
+        "¿Quién de aquí sería tu compañero ideal en una pelea de discoteca?",
+        "¿Qué es peor para ti: que nadie quiera jugar o que Bruno traiga 20 personas al plan de coche?",
+        "¿Qué prefieres litrar con los tiestos de Carlos o con chuches caducadas de Álex?",
+        "¿Quién crees que es mas falso del grupo?",
+        "¿Cuál ha sido tu peor borrachera y qué hiciste?",
+        "Dale un abrazo a la persona de tu izquierda durante 10 segundos",
+        "¿En qué momento pasaste de ser sociable a ser un community manager con aires de dictador?",
+        "¿A quién habría que mutear en el grupo porque cada vez que habla, baja el IQ colectivo?",
+        "RETO: sube una historia alabando a Bruno",
+        "Escribe por el grupo: “Creo que soy un poco enojón, ¿alguien quiere hablarlo por privado?”"
+
+      ],
+      "Nico": [
+        "¿Qué canción necesitas para dar tu mejor perreo?",
+        "¿Cómo nació tu papel de bebesaurio de Iván?",
+        "¿Con quien del grupo tienes mejor flow en la pista... y con quien ni lo intentas?",
+        "Casar, besar, matar: Bruno, Oier, Erasmo.",
+        "¿Quién claramente NO sabe bailar pero no se lo dices?",
+        "¿Te has sentido mas sexy que alguien del grupo y los has disfrutado?",
+        "¿Quién del grupo es un 10 sentado y un 3 bailando?",
+        "¿Quién del grupo crees que se perdería más fácil que tú en “Endamundo”? aka Unamúno",
+        "¿A quién te llevarías de viaje a Colombia del grupo y por qué? ¿Y a quien no llevarías ni loco?",
+        "¿Qué es más difícil: entenderte con un segurata de Flash o explicar dónde está Unamuno?",
+        "¿Quién del grupo te aguanta mejor cuando te pones modo “bebesaurio”?",
+        "¿Quién se confundiría contigo y acabaría bajándose en el aeropuerto de Madrid también?",
+        "Casar, besar, matar: Antony, Carlos, Luis.",
+        "Casar, besar, matar: Davidmairena, Wil, Davis",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta épica en Endamundo y a quién dejarías fuera sin piedad?",
+        "¿Quién del grupo sería el más probable en dejarte tirado en una disco?",
+        "Si tuvieras que elegir un “nuevo Iván” como líder, ¿a quién pondrías?",
+        "Dale un abrazo a la persona más jovén durante 10 segundos",
+        "¿A qué dos personas del grupo elegirías para pegarte con otros tres colombianos?",
+        "Envia un mensaje por el grupo: extraño mucho a mi bebesaurio",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+
+      ],
+      "Oier": [
+        "¿A quién le pegarías ahora mismo sin motivo?",
+        "¿Qué frase dices más: 'pitxin' o 'ayyy'?",
+        "¿Cuál fue tu consulta de ginecólogo más rara en la discoteca?",
+        "Si pudieras quejarte oficialmente de algo hoy, ¿de qué sería?",
+        "¿Prefieres pegarle a Bruno sobrio o borracho?",
+        "Te han usado por tu cuerpo alguna vez dentro del grupo?",
+        "¿A quien del grupo le darías clase de educación física?",
+        "¿Has notado celos por tu físico de alguien del grupo?",
+        "¿Cuántos “pitxin” dirías en una noche entera de fiesta?",
+        "¿Qué prefieres: quejarte de Iván mandando juegos o pegarle a Bruno por sus golpes?",
+        "¿Cómo explicarías a tu familia que juegas al ginecólogo en la discoteca?",
+        "¿Quién del grupo se merece más queja hoy?",
+        "¿Qué es peor: entrar a Flash con Bruno gritando o con Nicolás diciendo Endamundo?",
+        "Si tuvieras que quejarte de un invento, ¿sería el móvil de Carlos o la gorra de Luis?",
+        "¿Qué prefieres: un cubata gratis o la oportunidad de darle un guantazo a Bruno?",
+        "¿Cómo sonarías si mezclas “ayyy” con tu mejor queja?",
+        "¿A quién del grupo te llevarías a un concurso de quejas profesionales?",
+        "Si todos aquí fueran personajes de una serie, ¿quién sería el protagonista, quién el secundario divertido y quién el villano?",
+        "Casar, besar, matar: Nico, Bruno, Erasmo.",
+        "Casar, besar, matar: Antony, Carlos, Iván.",
+        "Casar, besar, matar: Davidmairena, Wil, Davis.",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal y a quién dejarías fuera?",
+        "Si tuvieras que pasar un mes entero compartiendo piso con 3 de aquí, ¿a quiénes escogerías?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿Quién del grupo te saca más de quicio en una noche de fiesta?",
+        "¿A quién elegirías para quejarte juntos toda la noche: a Nicolás (bebesaurio), a Luis (“mieeldaaa”) o a Davis (“calabaza calabaza”)?",
+        "Haz una historia abrazando a otro musculoca del grupo con el texto: “No todo es odio, a veces es sudor compartido.”",
+        "Dale un pico al más alto entre los presentes."
+        
+
+
+
+      ],
+      "Bruno": [
+        "¿Cuál es el mayor número de personas que has intentado meter en un coche?",
+        "¿Qué gritas más cuando bebes?",
+        "Si fueras conductor de bus, ¿a quién dejarías fuera primero?",
+        "¿Prefieres que la gente te recuerde por tus gritos o por tus planes imposibles?",
+        "¿Cómo convencerías al grupo de que entren 30 en un coche de 5 plazas?",
+        "¿Con quien del grupo llegarías pronto solo para impresionarle?",
+        "¿A qué excusa recurres cuando llegas tarde y sabes que es mentira?",
+        "¿Qué crees que se dice de ti en el grupo cuando todavía no has llegado?",
+        "¿Qué canción de Bad Bunny usarías para entrar gritando a una fiesta?",
+        "¿Cómo explicaste que confundieras el reservado de Back con los baños?",
+        "¿A quién cuidas más en las fiestas: a Iván enojado o a Nicolás modo bebesaurio?",
+        "¿Qué prefieres: perder otro regalo o aguantar 3 horas de quejas de Oier?",
+        "¿Qué harías si te encuentras tu regalo perdido de Erasmo y Davis en el reservado de Flash?",
+        "¿Qué es más fuerte: tus gritos borracho o el “mieeldaaa” de Luis?",
+        "¿Cómo convencerías a Bad Bunny de hacer un perreo con Nicolás en las fiestas de Santurtzi?",
+        "¿Con quién te ves viviendo de roomie y quién sería un infierno como compañero de piso?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar, besar, matar: Iván, Nico, Oier.",
+        "Casar, besar, matar: Erasmo, Antony, Carlos.",
+        "Casar, besar, matar: Rodrigo, Davidmairena, Wil.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿A qué 5 personas del grupo invitarías a tu reservado VIP en Flash (y a quién dejarías fuera)?",
+        "Si tu vida fuera una película, ¿quién sería tu aliado fiel y quién tu villano principal?",
+        "¿Quién sería tu compañero perfecto de gritos en un concierto de Bad Bunny?",
+        "¿A quién elegirías como tu “backup mejo” si Iván, Antony y Carlos se cansan de pelear por ti?",
+        "¿Cuántos secretos ha contado borracho y luego fingido amnesia?",
+        "Escribe por el grupo: “Extraño a uno de los nuevos, pero no sé cómo decirlo…”",
+        "Envía un mensaje privado a un nuevo del grupo diciendo: “No eras tan malo como pensé. ¿Café?”",
+        "Haz una historia con dos del grupo diciendo: “Solo uno de los dos me gusta. Adivinen.”",
+        "Escribe al grupo: “¿Alguna vez pensaron que tengo cero neuronas? Los leo”.",
+        "Dale un pico a la persona que más te cuida en el grupo como “agradecimiento maternal”."
+
+
+
+
+      ],
+      "David Mairena": [
+        "¿Qué pasó realmente con la Sister Hong en Madrid?",
+        "¿Por qué desapareces siempre sin avisar?",
+        "¿Cuál es tu excusa para no entrar nunca a la discoteca?",
+        "¿Qué prefieres: litronas o chupitos?",
+        "¿Quién del grupo no te aguanta sobrio porque hablas demasiado?",
+        "¿Con quién del grupo pudes ser tu mismo sin que te juzgue?",
+        "¿Quien del grupo necesita más energia y quien debería calmarse un poco?",
+        "¿Qué es más fuerte: tu grito de avestruz o los gritos de Xiao Xiao?",
+        "¿Cómo justificas desaparecer y aparecer con Roberto Carlos de la nada?",
+        "¿Si fueras un animal de fiesta, serías un avestruz o un bebesaurio como Nicolás?",
+        "¿Quién del grupo te aguanta mejor cuando haces un live en mitad de la música?",
+        "¿Xiao Xiao o Sister Hong?",
+        "¿Qué es peor: que Sister Hong te persiga o que Iván se enoje porque te escapaste?",
+        "¿A quién invitarías primero a salir en uno de tus directos: Luis con su gorra o Snay con su vino?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Si tuvieras que confiarle tu crush a alguien, ¿a quién sería? ¿Y quién sería el último en la lista?",
+        "Casar, besar, matar: Iván, Nico, Bruno.",
+        "Casar, besar, matar: Oier, Erasmo, Antony.",
+        "Casar, besar, matar: Carlos, Rodrigo, Wil.",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal y a quién dejarías fuera?",
+        "¿Quién del grupo sería tu mejor aliado en un apocalipsis zombie?",
+        "Si tu vida fuera una película, ¿quién del grupo sería el héroe, quién el villano y quién el alivio cómico?",
+        "¿A quién prefieres como compañero de desaparición nocturna: Rodrigo o Carlos?",
+        "¿A qué 5 personas del grupo invitarías a un live en TikTok desde la disco?",
+        "¿Quién del grupo sería tu cómplice perfecto para una escapada con Roberto Carlos?",
+        "¿A quién del grupo te llevarías como guardaespaldas si vuelves a cruzarte con Sister Hong?",
+        "¿Qué es peor: el acento Madrileño fingido de Davis o las rastas que se puso Erasmo?",
+        "Si Iván fuera un cóctel, ¿sería más “tequila con rencor” o “vodka con enfados pasivo-agresivos”?",
+        "Dale un pico a la persona de tu derecha"
+
+      ],
+      "David Esteban": [
+        "¿Quién del grupo te desespera por ser lo opuesta a ti: rápido, directo y caótico?",
+        "¿Quién te ayuda a soltarte más y quien te bloquea más?",
+        "¿Con quién harías un dúo de karaoke del grupo?",
+        "¿Te ha gustado alguien del grupo pero ya era tarde?",
+        "¿Qué es más resistente: tus rizos o la lanzadera que siempre se estropea?",
+        "¿Cómo explicarías la conexión entre tus rizos y los de Kassandra?",
+        "¿Cómo convencerías al grupo de unirse oficialmente al club que cofundaste?",
+        "¿Qué prefieres: quejarte con Davis en el camino a San Miguel o hacer un directo de TikTok con David Mairena?",
+        "¿Cuál fue el momento más random que viviste con Oier camino a casa?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Casar, besar, matar: Iván, Nicolás y Bruno.",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal en San Miguel?",
+        "¿A quién del grupo le darías el título de “peor club member” y por qué?",
+        "Casar, besar, matar: Erasmo, Davis y Carlos.",
+        "¿A qué persona del grupo mandarías a vivir a Altamira en bici con Desiree?",
+        "¿Quién sería tu compañero ideal en un karaoke: Wil cantando Taylor Swift o Davis con Lana del Rey?",
+        "Si tuvieras que elegir un “bebesaurio” como el de Iván, ¿a quién del grupo adoptarías?",
+        "Casar, besar, matar: entre Snay, Rodrigo y Antony.",
+        "¿Iván se hizo tóxico o siempre lo fue y solo ahora nos dimos cuenta?"
+      ],
+      "Davis": [
+        "¿Cuál es la mayor mentira que le has dicho a alguien sin que te pillaran?",
+        "¿Has inventado algo para hacerte ver más interesante ante tu crush?",
+        "¿Qué prefieres: fiesta en casa o discoteca?",
+        "¿Qué historia tuya ya nadie del grupo se cree?",
+        "¿Quién del grupo te tiene más calado y no se cree tus cuentos?",
+        "¿Has usado alguna vez la carta 'drama con marroquí' para justificar una ausencia?",
+        "¿Qué canción de Lana del Rey dedicarías a tu mejo Erasmo?",
+        "¿Qué prefieres: participar en un botellón o ponerte rastas como Erasmo?",
+        "¿Cómo convencerías a Iván de que Lana del Rey es mejor que Bad Bunny?",
+        "¿Con quién cantarías un dúo de Lana del Rey: con Desiree o con Rodrigo?",
+        "¿Qué es más eterno: la gorra de Luis o tus viajes a Madrid?",
+        "¿Cómo sonarías haciendo un grito de avestruz junto a David Mairena en un live?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿A quién del grupo le cantarías una canción de Lana del Rey con acento Madrileño?",
+        "¿A qué 5 personas del grupo invitarías a tu concierto privado de Lana del Rey?",
+        "Casar, besar, matar: entre Iván, Nicolás y Bruno.",
+        "Casar, besar, matar: entre Erasmo, David Mairena y Carlos.",
+        "¿Quién del grupo crees que tiene más pinta de fingir acento madrileño contigo?",
+        "¿Por qué solo respondes historias con un “¿y yoooo??” como si fuera un conjuro?"
+      ],
+      "Luis": [
+        "¿Cuántos años lleva esa gorra contigo?",
+        "¿Cuál es la ocasión en la que más has dicho 'mieeldaaa'?",
+        "¿Te atreverías a salir una noche sin gorra?",
+        "¿Qué prefieres: arepas o perreo?",
+        "Si tu gorra hablara, ¿quién es la persona del grupo que le caería peor?",
+        "¿Qué prefieres: que te quiten la gorra en plena disco o que te hagan decir “mieeldaaa” 100 veces seguidas?",
+        "¿Cómo reaccionarías si Bruno pierde tu gorra igual que sus regalos de cumple?",
+        "¿Qué plato venezolano invitarías a todo el grupo después de una fiesta?",
+        "¿Quién del grupo se vería más raro usando tu gorra?",
+        "¿Qué es más fuerte: tu acento venezolano o los gritos de avestruz de David Mairena?",
+        "¿Cómo convencerías a Iván de que la gorra debería ser parte oficial del club?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿A quién elegirías como tu guardaespaldas en una fiesta: Alex con los seguratas de Moma o David Mairena con su grito de avestruz?",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal de perreo-robot?",
+        "¿Quién sería tu compañero perfecto para un concurso de baile robótico?",
+        "¿Quién del grupo se merece un “mieeldaaa” tuyo en toda la cara?",
+        "¿A quién elegirías como tu DJ personal: Wil con Taylor Swift, Davis con Lana del Rey o Bruno con Bad Bunny?",
+        "¿Qué 5 personas del grupo serían tus compañeros de litrona ideal?",
+
+      ],
+      "Snay": [
+        "¿Qué tiene tu dedo que siempre te lo muerdes?",
+        "¿Quién es el peor club member y por qué?",
+        "¿Cómo reaccionarías si Luis pierde la gorra en directo en tu canal?",
+        "¿Con quién NO compartirías una botella nunca?",
+        "¿Qué prefieres: vino caro con la cara de Davis o barato pero en cantidad?",
+        "¿Quién del grupo sería tu compañero ideal de stream y quién sería el peor?",
+        "¿Quién crees que gritaría más en tu chat: Oier gritando o David Mairena con voz de avestruz?",
+        "¿Qué prefieres: ganar un torneo en Twitch o que Luis diga “mieeldaaa” en cadena nacional?",
+        "¿Qué es más estable: tu conexión de Twitch o los rizos de David Esteban?",
+        "¿Qué harías si un seguidor de Twitch te confunde y piensa que tu nombre es “Ask”, como a Carlos?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿A qué 5 personas del grupo invitarías a una velada de vino + Twitch?",
+        "¿Quién del grupo sería el peor compañero de stream en Twitch (porque no calla nunca)?",
+        "¿Quién sería tu “partner oficial” para una cata de vinos del grupo?",
+        "¿Quién del grupo se merece un “ban” instantáneo en tu canal por pesado?",
+        "¿Iván es sociable o simplemente colecciona gente como trofeos?",
+      ],
+      "Antony": [
+        "¿Cuál es la mejor vez que te hiciste el tonto y coló?",
+        "¿Qué disfraz te inventarías con solo un globo?",
+        "¿Qué prefieres: parecer listo o parecer tonto?",
+        "¿Cuál ha sido tu jugada maestra que nadie notó?",
+        "¿Qué tipo de globo llevarías a una boda?",
+        "¿Has llegado alguna vez tarde a una cita por tu peinado?, sé sincero.",
+        "¿Quién del grupo necesita más ayuda con su look para salir?",
+        "¿Quién sería capaz de hacerse un peinado mejor que el tuyo?",
+        "¿Quién sería capaz de aguantarte dos hora peinandote sin explotar?",
+        "¿Te has puesto celoso de alguien por su peinado alguna vez?",
+        "¿Quién del grupo es más fácil de engañar cuando te haces el tonto?",
+        "¿Qué prefieres: llevar 10 globos de colores o aguantar 10 quejas de Oier?",
+        "¿Qué harías si un segurata de Manolita piensa que tu globo es un arma peligrosa?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Si tuvieras que elegir un “bebesaurio” como el de Iván, ¿a quién del grupo adoptarías?",
+        "¿Qué prefieres: pasar toda la noche escuchando los gritos de DavidMairena o las quejas de Oier en acento madrileño como el de Davis?",
+        "Casar, besar, matar: entre Iván, Carlos y Bruno.",
+        "Casar, besar, matar: entre Nicolás, Oier y Erasmo",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta temática de Bad Bunny con globos?",
+        "¿Quién del grupo sería tu rival más fuerte en un concurso de disfraces improvisados?",
+        "¿A qué 5 personas del grupo invitarías a un plan random contigo (donde nadie entienda cómo acabaron allí)?",
+        "¿Por qué solo sales en fotos si está Bruno y un filtro?",
+        "¿A quién elegirias entre Bruno y tu gomina?",
+        "¿A quién del grupo le quedaría mejor tu peinado?",
+      ],
+      "Carlos": [
+        "¿Cuál ha sido tu plantón más legendario?",
+        "¿Cuántas horas al día pasas pegado al móvil?",
+        "¿Cómo fue eso de que te llamaran Ask?",
+        "¿Cuál es tu excusa favorita para no aparecer a los planes?",
+        "¿Cuántas veces has dejado plantado al grupo por quedar con un tío?",
+        "¿Qué prefieres: que te vuelvan a llamar “Ask” o que Iván se enoje contigo por no aparecer?",
+        "¿Quién del grupo revisa más el móvil que tú?",
+        "¿Qué prefieres: que Bruno te elija de “mejo” o que Iván te declare la guerra por él?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Casar, besar, matar: entre Davis, Wil y Rodrigo",
+        "Casar, besar, matar: entre Oier, Luis y Antony.",
+        "Casar, besar, matar: entre Iván, Nicolás y Bruno.",
+        "¿A qué 5 personas del grupo invitarías a una fiesta sin plantón (de verdad)?",
+        "¿Quién del grupo es más probable que te robe el móvil en plena disco?",
+        "¿A quién del grupo nunca invitarías a una cita doble porque te dejaría tirado igual que tú?",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+        
+        "¿Qué frase típica del grupo repetirías más veces en una noche: “Oier saca un juego” o “Cashate”?",
+
+      ],
+      "Alex": [
+        "¿Cuántas veces te han echado de una discoteca ya?",
+        "¿Cómo convenciste a alguien para dejarte de RRPP?",
+        "¿Qué prefieres: cuidar abuelos o aguantar seguratas?",
+        "¿Cuál es tu táctica para entrar gratis a todos lados?",
+        "¿Cómo ligas más: siendo RRPP o cuidando abuelos?",
+        "¿Alguna vez te has sentido culpable por ligarte a algun ex/ligue de alguien del grupo?",
+        "¿Quién se hace el inocente pero claramente va a lo mismo que tu?",
+        "¿Quién sería tu competencia más dura en una noche de Flash?",
+        "¿Quién sería tu compañero ideal de abuelos?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Casar, besar, matar: entre Oier, David Mairena y Carlos.",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal en Moma?",
+        "¿Qué prefieres: cuidar a Bruno borracho o cuidar a Nicolás en modo bebesaurio toda una noche de fiesta?",
+        "Casar, besar, matar: entre Davis, Rodrigo y Erasmo.",
+        "Casar, besar, matar: entre Antony, Wil y David Esteban.",
+        "¿Quién del grupo se merece un pase VIP vitalicio de tu parte en Moma?",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+      ],
+      "Erasmo": [
+        "¿Por qué tardas meses en enviar las fotos?",
+        "¿Quién del grupo sería el peor copiloto si tendrías que llevarlo a casa borracho?",
+        "¿Puedes imitar tu propia risa de abuelo ahora mismo?",
+        "¿Quienes han sido tus peores modelos de fotografía?",
+        "¿Quién crees que solo se junta contigo por que tienes coche?",
+        "¿Quién te ha hecho sentir mas como Uber que como amigo?",
+        "¿Alguna vez has finjido no poder salir solo para no llevar el coche?",
+        "¿Qué prefieres: vivir con rastas eternas o trabajar en Flash sirviendo helados?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Si tuvieras que elegir un “bebesaurio” como el de Iván, ¿a quién del grupo adoptarías?",
+        "Casar, besar, matar: entre Oier, David Mairena y Bruno.",
+        "¿A qué 5 personas del grupo invitarías a tu fiesta ideal en la heladería? (con helado ilimitado, claro).",
+        "Casar, besar, matar: entre Rodrigo, Antony y Wil.",
+        "¿Quién del grupo sería el mejor modelo para tus fotos y quién sería el peor?",
+        "Casar, besar, matar: entre Iván, Carlos y David Esteban.",
+        "¿Qué prefieres: volver a ponerte rastas por un mes entero o hacer un nuevo diseño de las pegatinas del club?",
+        "¿Qué prefieres soportar volver a trabajar a Rodrigo o el novio de Harís?",
+        "Dale un pico a la ultima persona que te ha enviado un mensaje por privado de los presentes",
+        "¿Cómo reaccionarías si Luis entra y te pide un helado… pero para su gorra?"
+      ],
+      "Wil": [
+        "¿Qué prefieres: entrenar con Oier en el gym o cantar Taylor Swift en karaoke con todo el grupo?",
+        "¿Qué es más fuerte: tu acento venezolano o el “mieeldaaa” de Luis?",
+        "¿Quién del grupo sería tu compañero ideal para un concierto de Taylor Swift?",
+        "¿Quién del grupo se merece un “te le dije” legendario tuyo y por qué?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Casar, besar, matar: entre Oier, David Mairena y Bruno.",
+        "Casar, besar, matar: entre Oier, Rodrigo y David Esteban.",
+        "¿A qué 5 personas del grupo invitarías a un concierto de Taylor Swift contigo?",
+        "¿Qué prefieres: que Davis te obligue a escuchar Lana del Rey en bucle o que Luis te baile robot toda la noche?",
+        "¿Xiao Xiao o Pocoyo?",
+        "¿Quién del grupo sería tu compañero ideal de gym y quién sería el peor (se rendiría en la primera sentadilla)?",
+        "Casar, besar, matar: entre Bruno, David Mairena y Erasmo.",
+        "Casar, besar, matar: entre Iván, Antony y Carlos.",
+        "Si tuvieras que invitar solo a 3 del grupo a entrenar contigo en el gym, ¿quiénes serían y por qué?"
+      ],
+      "Desiree": [
+        "¿Qué prefieres: una noche entera en Budha o una aparición legendaria en Pozas 42?",
+        "¿Qué es más fuerte: tus gritos enfadada o los de Bruno borracho?",
+        "¿Con quien del grupo irias a Budha cada fin de semana?",
+        "¿A quién elegirías del grupo como tu compañero de gritos oficiales?",
+        "¿Quién del grupo sería incapaz de colarse en Budha y os arruinaría el plan?",
+        "¿Cómo reaccionarías si al entrar a Budha te reciben con un ejército de africanos bailando?",
+        "¿Quién del grupo aguantaría mejor una competencia de baile contra un africano en Budha?",
+        "¿Quién del grupo sería tu mejor “cómplice” para conquistar a un africano en Budha?",
+        "¿Qué prefieres: caerte otra vez en bici en Altamira o tener que ir una noche a Flash obligada?",
+        "¿Quién del grupo es más probable que se caiga contigo en bicicleta subiendo a Altamira?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+    ],
+      "Rodrigo": [
+        "¿Qué prefieres: fiesta en casa o discoteca?",
+        "¿Qué momento clave del grupo descubriste tiempo después y flipaste?",
+        "¿Quién del grupo te agobia más y por qué?",
+        "¿Alguna vez has hablado con alguien pensando que no era parte del grupo?",
+        "¿Quién del grupo te daría una lista de cosas para recordar antes de salir de casa?",
+        "¿Qué prefieres: que Erasmo tarde dos meses en pagarte o en mandarte una foto?",
+        "¿Qué sabor de helado describe mejor a cada uno de los jugadores?", 
+        "¿Qué es más frío: un helado en tu curro o Iván cuando se enoja?",
+        "¿Cómo reaccionarías si Álex entra y te pide un helado… pero para su tercer pezon?",
+        "¿A quién del grupo le darías un helado gratis y a quién le cobrarías el doble?",
+        "¿Cómo sonarías si tuvieras que gritar como David Mairena para vender helados en la calle?",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "¿Quién crees que está más obsesionado con el otro: Joel con Iván, o Joel con su paz mental?",
+        "¿Es saltar su forma de pegar o una alarma de error?",
+        "Escribe en el grupo: “He entendido todos los chistes del último mes. Y sí, me dolieron.”",
+        "Haz una historia diciendo: “Hoy entendí una indirecta que me lanzaron en julio. Perdón por existir.”",
+        "Dale un pico a la persona de tu derecha"
+      ],
+      "Luana": [
+        "¿Qué prefieres del club?",
+        "¿A quién no aguantas del grupo?",
+        "¿Quién del grupo te agobia más y por qué?",
+        "¿Alguna vez has hablado con alguien pensando que no era parte del grupo?",
+        "¿Va descalza por moda o porque ha vencido al capitalismo?",
+        "¿A que 3 personas elegirías para una noche andando descalza por la Gran Vía?",
+        "Casar besar matar: Erasmo, Carlos, Antony",
+        "Casar besar matar: Nico, Iván, Rodrigo",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+         "Si tuvieras que elegir un “nuevo Iván” como líder, ¿a quién pondrías?",
+      ],
+      "Invitado": [
+        "¿Qué piensas de Iván y su obsesión con los juegos?",
+        "Imita a Bruno cuando se emborracha en una fiesta",
+        "¿Qué opinas de la gorra eterna de Luis?",
+        "¿A quién escogerías como compañero de litrona, DavidMairena o Davis?",
+        "¿Quién crees que tarda más en enviar fotos, Erasmo o tú?",
+        "¿Qué preferirías: que Iván te elimine del grupo porque no quieres jugar o que Oier te haga de ginecólogo en la disco?",
+        "Si Erasmo te hace una foto hoy, ¿cuándo crees que la recibirías?",
+        "¿Qué harías si Carlos te deja plantado en mitad de la noche?",
+        "¿A quién le confiarías tu gorra eterna, a Luis o a Snay con su vino?",
+        "¿Qué preferirías: perrear como Nicolás o desaparecer como David Mairena?",
+        "Si Alex intenta colarte en Moma y lo echan, ¿qué excusa pondrías tú al segurata?",
+        "¿Cuál es más probable que pase: que Antony aparezca disfrazado solo con un globo o que Davis venga con su túnica marroquí?",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+        "¿Qué frase típica del grupo repetirías más veces en una noche: “Oier saca un juego” o “Cashate”?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Casar besar follar matar elegido por el jugador de tu derecha",
+        "Si tuvieras que elegir un “nuevo Iván” como líder, ¿a quién pondrías?",
+        "¿Con quién te acostarías del grupo por puro morbo?",
+        "¿Quién es el alma de la fiesta?",
+        "Casar besar matar: Erasmo, Carlos, Antony",
+        "Casar besar matar: Iván, Bruno, Wil",
+        "Dale un beso en la mejilla a la persona de tu derecha",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+      ],
+      "POR TURNOS": [
+        "¿Quién del grupo no aporta nada pero siempre se queja como si tuviera acciones en la amistad?",
+        "¿Con quién te acostarías del grupo por puro morbo?",
+        "¿Con quién nunca harías un viaje porque sabes que acabarías odiándolo?",
+        "¿Cuál ha sido tu momento más humillante con el grupo y por qué aún lo niegas o minimizas?",
+        "¿A quién bloqueaste alguna vez o silenciaste sin que se entere? ¿Por qué?",
+        "¿Qué persona del grupo tiene una personalidad que en la vida real no soportarías si no fuera parte de este club?",
+        "¿A quién te da más envidia de forma no sana? Y sí, dilo.",
+        "Confiesa: ¿Qué cosa del grupo te parece lo más cringe, hipócrita o desesperante? Nombres incluidos.",
+        "¿A quién has criticado fuertemente a espaldas pero sigues tratándolo como si nada?",
+        "¿Quién sería capaz de ligar con la ex de otro del grupo “sin querer”?",
+        "¿Quién es la típica persona que desaparece cuando hay que ayudar, pero aparece en la foto final como si hubiera hecho todo?",
+        "¿Quién tiene tanta necesidad de atención que sería capaz de fingir estar enamorado de alguien solo para generar drama?",
+        "¿Con qué dos personas del grupo harías un trío?",
+        "¿Con cuantos de los presentes te has líado?",
+        "¿Con cuantos de los presentas has follado?",
+        "Dale un pico a la persona de tu derecha",
+        "Dale un pico a la persona de tu derecha",
+        "Dale un pico a la última persona que ha llegado",
+        "Dale un pico a la última persona en unirse al grupo",
+        "Dale un pico a la persona más alta de los presentes",
+        "Dale un pico a la persona más bajas de los presentes",
+        "Chupale la oreja a la primera persona que conociste entre los presentes",
+        "Chupale la oreja a la última persona que conociste entre los presentes",
+        "Besale el cuello a la persona con la que hayas tenido tu último chat privado entre los presentes",
+        "Termina el cubata",
+        "Besa el cuello de la persona de tu izquierda",
+        "¿Quiénes son las 3 personas que más te atraen fisicamente entre los presentes?",
+        "Dale un pico a la persona elegida por el jugador de tu derecha",
+        "Elige dos personas para que se den un pico",
+        "Elige personas para un beso de tres",
+        "Sube un selfie con la persona de tu derecha",
+        "Sube un selfie con la persona de tu izquierda",
+        "Casar follar besar matar elegido por el jugador de tu derecha",
+        "Casar follar besar matar elegido por el jugador de tu izquierda",
+        "Di algo bueno y algo malo de la persona de tu derecha",
+        "Di algo bueno y algo malo de la persona de tu izquierda",
+        "Dale un consejo a la última persona en entrar al grupo: ten cuidado con... y acercate más a...",
+        "¿Qué dos personas hacen buena pareja pero nunca han estado juntos?",
+        "¿Qúe dos personas son lo contrario al otro?",
+        "Califica el fisico, personalidad e inteligencia de la persona de tu derecha",
+        "Califica el fisico, personalidad e inteligencia de la persona de tu izquierda",
+        "¿Cuál es tu rivalidad favorita?",
+        "¿Quién es la persona más falsa del grupo y cómo te diste cuenta?",
+        "¿A quién del grupo lo probarías en la cama por curiosidad?",
+        "¿Con quién tendrías una relación secreta solo por el morbo de que nadie lo sepa?",
+        "¿Con quién crees que el jugador de tu derecha ha tenido una tensión sexual no resuelta?",
+        "¿Con quién crees que el jugador de tu izquierda ha tenido una tensión sexual no resuelta?",
+        "¿A quién perdonarías algo imperdonable solo porque le tienes cariño?",
+        "¿Quién crees que se ha liado con alguien del grupo y nunca lo ha confesado?",
+        "¿Con quién harías un ‘friends with benefits’ sin dudarlo?",
+        "¿Quién sería el ex más tóxico si lo tuvieras como pareja?",
+        "¿Quién se ve súper inocente pero tú sabes que no lo es para nada?",
+        "¿Quién parece que se tira indirectas a sí mismo/a para que alguien le pregunte “¿estás bien?”?",
+        "Hazle un masaje en el cuello al que más bebida tenga en su copa",
+        "Besa la mejilla de la persona con quien menos hablas",
+        "Besa la mejilla de la persona de tu derecha",
+        "Haz contacto visual 60 segundos con la persona que menos bebida tenga en su copa",
+        "Hazle un cumplido físico a la persona de tu derehca y uno sexual a la persona de tu izquierda (en el oído)",
+        "Enviale un mensaje a alguien “esta noche tú y yo” y no expliques nada.",
+        "Haz un brindis improvisado por la persona más atractiva del grupo.",
+        "¿Quién del grupo te cae bien pero no te gusta cómo trata a los demás?",
+        "¿Cuál fue tu primera impresión de las personas de tu izquierda y derecha? Sé honesto/a.",
+        "¿Alguna vez sentiste que alguien te excluye en este grupo?",
+        "¿Quién tiene mejor vibra para una relación estable, pero no te atrae nada?",
+        "Enviale un mensaje a alguien: “el error más rico que volvería a cometer”.",
+        "Elige a dos personas y deja que decidan entre ellos qué reto te toca.",
+        "Envía un mensaje tipo “¿Quieres venir esta noche?” a la persona que eliga el que esta leyendo",
+        "La persona más joven del grupo debe decirte al oído que es la que más le gusta de ti",
+        "Date un pico con la persona más mayor de aquí",
+        "Date un pioc con la persona más joven de aquí",
+        "La persona más mayor del grupo debe decirte al oído que es la que más le gusta de ti",
+        "¿Quiénes son las 3 personas con las que mejor te llevas de los presentes?",
+        "¿Quiénes son los 3 más guapos del grupo para ti?",
+        "¿Quién tiene mejor cuerpo/físico?",
+        "¿Quién tiene la mejor sonrisa?",
+        "¿Quién viste mejor?",
+        "¿Con quién te irías de vacaciones una semana?",
+        "Imita a Davis",
+        "Imita a Snay",
+        "Imita a Alex",
+        "Imita a Oier",
+        "Imita a Carlos",
+        "Escribe un mensaje por el grupo elegido por el jugador de tu derecha",
+        "¿Quién se pone más cariñoso/a con alcohol?",
+        "Empiezas tú y por turnos hacia la derecha vais diciendo a quién escogeríais como compañero/a de viaje por una semana.",
+        "Empiezas tú y por turnos confesáis con quién tendríais un ‘date’ solo por curiosidad.",
+        "Empiezas tú y vais girando hacia la derecha diciendo a quién le habéis mirado el cuerpo.",
+        "Empiezas tú y vais girando hacia la derecha diciendo a quién sacaríais del grupo si pudierais sin consecuencias.",
+        "Empiezas tú y vais girando hacia la derecha diciendo quién está infravalorado/a en este grupo.",
+        "Empiezas tú y vais girando hacia la derecha diciendo a quién criticaste fuerte en algún momento.",
+        "Empiezas tú y vais girando hacia la derecha diciendo a quién le guardarías un secreto muy heavy sin dudarlo.",
+        "Empiezas tú y vais girando hacia la derecha diciendo nombres de discotecas",
+        "¿Con quién crees que deberías llevare más?",
+        "Escribe por el grupo: Vale, lo confieso… me gustó alguien de este grupo. Ya podéis jugar a adivinar.",
+        "Escribe por el grupo: Eliminen a @_____ (la primera persona que te salga)",
+        "¿Quién es el mejor villano, y el personaje inocente?",
+        "¿Qué 3 personas del grupo serían tus compañeros de litrona ideal?",
+        "¿Qué frase típica del grupo repetirías más veces en una noche: “Oier saca un juego” o “Cashate”?",
+        "Elige a dos personas del grupo con las que harías un trío y a una con la que nunca.",
+        "Nombre a la persona más migajera del club y por qué",
+        "¿Qué prefieres? Que Iván te tire un cubata en la cara por error… o que Davis te hable con su acento falso madrileño toda la noche sin parar.",
+        "¿Qué prefieres? Que Antony te peine con su gomina nivel cemento… o que Álex te escriba los votos de tu boda sin revisar su ortografía.",
+        "¿Qué prefieres? Ir de copiloto con Erasmo y que se le cale el coche en cada semáforo… o compartir una scooter con David Mairena hiperactivo.",
+        "¿Qué prefieres? Escuchar un monólogo de Bruno sobre su drama amoroso de este mes… o aguantar a Carlos criticando a todo Grindr como si él no tuviera perfil premium.",
+        "¿Qué prefieres? Cargar la mochila de Luis toda una noche… o cargar con las contradicciones de Oier sobre Grindr durante un brunch.",
+        "¿Qué prefieres? Dormir con Davis mientras practica frases con acento de Madrileño… o con David Mairena haciéndote ASMR con sonidos de mono.",
+        "¿Qué prefieres? Ir de vacaciones con Álex y corregirle todos sus mensajes a la agencia… o viajar con Erasmo y sus 12 intentos para arrancar el coche.",
+        "¿Qué prefieres? Que Antony solo te suba en stories si también sale Bruno… o que Davis solo te invite si puedes pronunciar “Calabaza” con su acento fake.",
+        "¿Qué prefieres? Que Antony te peine el vello púbico con su gomina mientras pone Bad Bunny de fondo… o que Snay te diga “estás divina” mientras te pinta los pezones con glitter.",
+        "¿Qué prefieres? Que Davis te hable con su acento madrileño inventado durante todo un polvo… o que Iván grite “¡VAMOS CLUB!” en mitad del orgasmo.",
+        "¿Qué prefieres? Que Erasmo te recoja con su coche calado y os quedéis tirados… o que Bruno te lleve en moto mientras te cuenta su último drama amoroso llorando.",
+        "¿Qué prefieres? Que Oier te diga “Grindr es basura” mientras se lo descarga delante de ti… o que Carlos te haga match.",
+        "¿Qué prefieres? Tener que corregir todos los mensajes de Álex en tiempo real… o tener que justificar cada indirecta pasivo-agresiva de Iván como “cosas del zodiaco”.",
+        "¿Qué prefieres? Tener un trío con David Mairena y Davis (uno gritando y otro imitando)… o con Erasmo y Bruno (uno emocional, el otro llorando).",
+        "¿Qué prefieres? Que Iván te grabe bailando borracho y lo suba al grupo… o que Carlos haga captura de tu perfil de Grindr y lo comente con Erasmo por privado."
+
+
+
+      ],
+      "HEAVY": [
+        "¿Iván realmente quiere reunir al grupo o solo alimentar su necesidad de control?",
+        "¿Bruno odia a los nuevos porque le recuerdan a su yo del pasado?",
+        "¿Bruno está en el club por amor, por despecho o por puro ego?",
+        "¿Por qué Bruno siempre parece que va a traicionar al grupo y luego no lo hace?",
+        "¿Cuántos segundos necesita Nicolás para entender una indirecta?",
+        "¿Por qué el cerebro de Nico corre en 2G cuando todos van en 5G?",
+        "¿Qué pasa primero: que Nico piense una respuesta o que acabe el evento?",
+        "¿Rodrigo es lento o directamente vive en otro plano de tiempo?",
+        "¿Cómo Rodrigo logró ser heladero si se derrite por cada chico del club antes que el producto?",
+        "¿Cuál es más probable que pase: que Antony aparezca disfrazado solo con un globo o que Davis venga con su túnica marroquí?",
+        "¿Qué pesa más: los músculos de Oier o sus indirectas?",
+        "¿Oier quiere amor o una tragedia de novela venezolana?",
+        "¿Quién ha sobrevivido a un comentario de Oier sin llorar por dentro?",
+        "¿Es Oier migajera o solo le gusta tener a todos confundidos?",
+        "¿Qué tarda más: Erasmo enviando fotos o procesando límites?",
+        "Erasmo, Bruno quiere saber que parte de “déjala ir” no has entendido todavía",
+        "¿Qué ha explotado más Erasmo: sus relaciones o a sus empleados?",
+        "¿Qué dura más de David Mairena: su interés por alguien o una live en su Tik Tok?",
+        "¿Antony se peina o se plastifica?",
+        "¿Por qué Antony solo aparece en fotos si está Bruno?",
+        "¿Antony niega a sus ligues por dignidad o por contrato?",
+        "¿La gomina de Antony es a prueba de emociones?",
+        "¿Carlos quiere a Mikel o solo al drama griego?",
+        "¿Davis tiene acento madrileño o voz de casting fallido de Élite?",
+        "¿Qué le excita más a Davis: un moro o un baño sin vigilancia?",
+        "¿La mochila XL de Luis es para cargar cosas o traumas?",
+        "¿Snay lleva minifalda o la minifalda la lleva a ella?",
+        "¿Snay trajo a Raimundo al club por decisión propia o lo invocó con jagger?",
+        "¿Qué es más peligroso de Snay: su mirada celosa o su vino sin etiqueta?",
+        ""
+      ]
+    };
+
+    const todosLosJugadores = Object.keys(preguntas);
+    const seleccionados = [];
+
+    function crearCheckboxes() {
+      const container = document.getElementById("jugadoresCheckboxes");
+      todosLosJugadores.forEach(nombre => {
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = nombre;
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(nombre));
+        container.appendChild(label);
+      });
+    }
+
+    function guardarJugadores() {
+      const checkboxes = document.querySelectorAll(".checkboxes input:checked");
+      seleccionados.length = 0;
+      checkboxes.forEach(cb => seleccionados.push(cb.value));
+      if (seleccionados.length > 0) {
+        document.getElementById("btnGirar").style.display = "block";
+      } else {
+        alert("Selecciona al menos un jugador para empezar");
+      }
+    }
+
+    function girarRuleta() {
+      if (seleccionados.length === 0) return;
+      const nombre = seleccionados[Math.floor(Math.random() * seleccionados.length)];
+      const preguntaLista = preguntas[nombre];
+      const pregunta = preguntaLista[Math.floor(Math.random() * preguntaLista.length)];
+
+      document.getElementById("resultado").innerHTML = `🎯 <b>${nombre}</b>: ${pregunta}`;
+    }
+
+    crearCheckboxes();
+  </script>
+</body>
+</html>
